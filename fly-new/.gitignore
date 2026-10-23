@@ -1,0 +1,27 @@
+# Local Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local configuration
+.env
+.env.*
+.streamlit/secrets.toml
+
+# Generated videos/results and large local data
+video_engine_outputs/
+DS/
+*.zip
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,9 @@
+streamlit
+ultralytics
+torch
+torchvision
+opencv-python
+pandas
+numpy
+Pillow
+lap>=0.5.12

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flying Object Detection - Presentation Slides</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #1F2E3C;
+      --bg-card: #263748;
+      --bg-card-light: #2E4256;
+      --border: #3A536C;
+      --accent-cyan: #38BDF8;
+      --accent-blue: #60A5FA;
+      --accent-green: #34D399;
+      --accent-gold: #FBBF24;
+      --text-white: #FFFFFF;
+      --text-muted: #A5B9CD;
+      --text-dim: #788EA4;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0F172A;
+      color: var(--text-white);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .toolbar {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 12px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .toolbar h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-white);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .toolbar-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .nav-btn {
+      background: var(--bg-card-light);
+      border: 1px solid var(--border);
+      color: var(--text-white);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      background: var(--accent-cyan);
+      color: #0F172A;
+      border-color: var(--accent-cyan);
+    }
+    .slide-counter {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent-cyan);
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .slide-stage {
+      width: 100%;
+      max-width: 1200px;
+      aspect-ratio: 16 / 9;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 44px 56px;
+      display: none;
+      flex-direction: column;
+      animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .slide.active { display: flex; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .category-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .slide-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-white);
+      margin-bottom: 16px;
+      position: relative;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; height: 100%; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; height: 100%; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; height: 100%; }
+    .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; height: 100%; }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    .card.highlight { border-color: var(--accent-cyan); box-shadow: 0 0 20px rgba(56, 189, 248, 0.15); }
+    .card.green-highlight { border-color: var(--accent-green); box-shadow: 0 0 20px rgba(52, 211, 153, 0.15); }
+    .card-num {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent-cyan);
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 4px;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-white);
+      margin-bottom: 4px;
+    }
+    .card-subtitle {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent-blue);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .card-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .card-list li {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      position: relative;
+      padding-left: 14px;
+    }
+    .card-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--accent-cyan);
+      font-weight: bold;
+    }
+    /* Table styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th {
+      background: var(--bg-card-light);
+      color: var(--accent-cyan);
+      text-align: left;
+      padding: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      background: var(--bg-card);
+      color: var(--text-white);
+      padding: 10px 12px;
+      font-size: 12px;
+      border-bottom: 1px solid rgba(58, 83, 108, 0.5);
+    }
+    .badge-best {
+      background: rgba(52, 211, 153, 0.15);
+      color: var(--accent-green);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <h1><span>✈</span> Flying Object Detection - Presentation Slides</h1>
+    <div class="toolbar-actions">
+      <button class="nav-btn" onclick="prevSlide()">← Previous</button>
+      <span class="slide-counter" id="counter">1 / 12</span>
+      <button class="nav-btn" onclick="nextSlide()">Next →</button>
+      <a href="Flying_Object_Detection_Presentation.pptx" download style="text-decoration:none;">
+        <button class="nav-btn" style="background:var(--accent-cyan); color:#0F172A;">⬇ Download .PPTX</button>
+      </a>
+    </div>
+  </div>
+
+  <div class="slide-stage">
+    <!-- SLIDE 1 -->
+    <div class="slide active" style="padding:0;">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; height: 100%;">
+        <div style="padding: 56px 48px; display:flex; flex-direction:column; justify-content:center;">
+          <div class="category-tag">✈ COMPUTER VISION & DEEP LEARNING PROJECT</div>
+          <h1 style="font-size: 36px; font-weight:800; line-height: 1.15; margin-bottom: 8px;">
+            FLYING OBJECT DETECTION<br><span style="color:var(--accent-cyan);">& CLASSIFICATION</span>
+          </h1>
+          <p style="color:var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 24px;">
+            A Multi-Stage Aerial Surveillance System Integrating YOLO12 Detection, ByteTrack Trajectory Tracking, and 5 Hybrid Deep Learning Classifier Heads.
+          </p>
+          <div class="card" style="padding: 16px;">
+            <div style="color:var(--accent-cyan); font-weight:700; font-size:12px; margin-bottom:6px;">CORE STACK:</div>
+            <ul class="card-list">
+              <li><strong>Detector:</strong> YOLO12 Balanced (Weights: best.pt)</li>
+              <li><strong>Tracker:</strong> ByteTrack Multi-Object Associator</li>
+              <li><strong>Heads:</strong> CNN | LSTM | Transformer | BiLSTM+Attn | cGAN</li>
+            </ul>
+          </div>
+        </div>
+        <div style="background: url('presentation_images/airplane.jpg') center/cover no-repeat; border-left: 1px solid var(--border);"></div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: TABLE OF CONTENTS -->
+    <div class="slide" style="padding:0;">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; height: 100%;">
+        <div style="padding: 48px 44px; display:flex; flex-direction:column; justify-content:center; position:relative;">
+          <div style="position:absolute; left:24px; top:48px; bottom:48px; width:2px; background:var(--accent-cyan);"></div>
+          <div style="position:absolute; left:18px; top:36px; font-size:14px; color:var(--accent-cyan);">✈</div>
+          <h2 style="font-size: 26px; font-weight:800; margin-left: 20px; margin-bottom: 24px;">TABLE OF CONTENTS</h2>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-left: 20px;">
+            <div>
+              <div class="card-num">01</div>
+              <div style="font-size: 13px; font-weight:700; color:var(--accent-cyan); margin-bottom:4px;">PROJECT OVERVIEW</div>
+              <p style="font-size:11px; color:var(--text-muted); line-height:1.4;">Problem motivation & the 6 flying object target classes</p>
+            </div>
+            <div>
+              <div class="card-num">02</div>
+              <div style="font-size: 13px; font-weight:700; color:var(--accent-cyan); margin-bottom:4px;">ARCHITECTURE</div>
+              <p style="font-size:11px; color:var(--text-muted); line-height:1.4;">YOLO12 detector, ByteTrack tracker & MobileNetV3</p>
+            </div>
+            <div>
+              <div class="card-num">03</div>
+              <div style="font-size: 13px; font-weight:700; color:var(--accent-cyan); margin-bottom:4px;">5 HYBRID HEADS</div>
+              <p style="font-size:11px; color:var(--text-muted); line-height:1.4;">CNN, LSTM, Transformer, BiLSTM+Attn & cGAN heads</p>
+            </div>
+            <div>
+              <div class="card-num">04</div>
+              <div style="font-size: 13px; font-weight:700; color:var(--accent-cyan); margin-bottom:4px;">BENCHMARKS & UI</div>
+              <p style="font-size:11px; color:var(--text-muted); line-height:1.4;">Accuracy scores (91.98% LSTM) & Streamlit web app</p>
+            </div>
+          </div>
+        </div>
+        <div style="background: url('presentation_images/drone.jpg') center/cover no-repeat; border-left: 1px solid var(--border);"></div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: PROBLEM STATEMENT -->
+    <div class="slide">
+      <div class="category-tag">✈ 01. PROJECT OVERVIEW</div>
+      <div class="slide-title">Problem Statement & Aerial Surveillance Challenges</div>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-num">01</div>
+          <div class="card-title">Extreme Scale Variance</div>
+          <div class="card-subtitle">Distant & Miniature Targets</div>
+          <ul class="card-list">
+            <li>Flying objects like drones or birds often occupy as few as 15x15 pixels in 1080p footage.</li>
+            <li>High altitude and distant perspectives cause severe loss of structural visual cues.</li>
+            <li>Standard detectors suffer high miss rates on small airborne targets.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-num">02</div>
+          <div class="card-title">High Velocity & Maneuvering</div>
+          <div class="card-subtitle">Rapid Motion & Frame Exit</div>
+          <ul class="card-list">
+            <li>Airborne objects exhibit non-linear acceleration, rapid banking, and high-speed transit.</li>
+            <li>Motion blur frequently degrades edge contours and texture fidelity.</li>
+            <li>Single-frame detectors cannot assess velocity without temporal context.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-num">03</div>
+          <div class="card-title">Inter-Class Ambiguity</div>
+          <div class="card-subtitle">Deceptive Visual Similarities</div>
+          <ul class="card-list">
+            <li>From a distance, a soaring bird and an aerodynamic kite exhibit nearly identical static contours.</li>
+            <li>Commercial airplanes and drones share planar silhouette traits at sharp angles.</li>
+            <li>Requires combining spatial appearance with temporal trajectory tracking.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: TARGET CLASSES -->
+    <div class="slide">
+      <div class="category-tag">✈ 01. PROJECT OVERVIEW</div>
+      <div class="slide-title">Target Aerial Object Classes (Visual Taxonomy)</div>
+      <div class="grid-4" style="height: 320px;">
+        <div class="card" style="padding:0; overflow:hidden;">
+          <img src="presentation_images/airplane.jpg" style="width:100%; height:150px; object-fit:cover;">
+          <div style="padding:14px;">
+            <div class="card-title" style="color:var(--accent-cyan);">AIRPLANE</div>
+            <p style="font-size:11px; color:var(--text-muted); line-height:1.4;">Commercial airliners & jets, high-speed fixed-wing flight patterns.</p>
+          </div>
+        </div>
+        <div class="card" style="padding:0; overflow:hidden;">
+          <img src="presentation_images/helicopter.jpg" style="width:100%; height:150px; object-fit:cover;">
+          <div style="padding:14px;">
+            <div class="card-title" style="color:var(--accent-cyan);">HELICOPTER</div>
+            <p style="font-size:11px; color:var(--text-muted); line-height:1.4;">Rotary-wing aircraft, hover dynamics, rescue & transport flight profiles.</p>
+          </div>
+        </div>
+        <div class="card" style="padding:0; overflow:hidden;">
+          <img src="presentation_images/drone.jpg" style="width:100%; height:150px; object-fit:cover;">
+          <div style="padding:14px;">
+            <div class="card-title" style="color:var(--accent-cyan);">DRONE (UAV)</div>
+            <p style="font-size:11px; color:var(--text-muted); line-height:1.4;">Quadcopter surveillance drones, agile maneuvering, multi-rotor hover.</p>
+          </div>
+        </div>
+        <div class="card" style="padding:0; overflow:hidden;">
+          <img src="presentation_images/kite.jpg" style="width:100%; height:150px; object-fit:cover;">
+          <div style="padding:14px;">
+            <div class="card-title" style="color:var(--accent-cyan);">KITE</div>
+            <p style="font-size:11px; color:var(--text-muted); line-height:1.4;">High-altitude aerodynamic stunt & leisure kites, wind-propelled dynamics.</p>
+          </div>
+        </div>
+      </div>
+      <div class="card highlight" style="margin-top:16px; padding:12px 20px;">
+        <div style="font-size:12px; font-weight:700; color:var(--accent-cyan); margin-bottom:4px;">ADDITIONAL SUPPORTED CLASSES: BIRD & PARACHUTE</div>
+        <p style="font-size:11px; color:var(--text-white);">• <strong>Bird:</strong> Biological flapping & soaring patterns, distinguished via temporal sequence heads. • <strong>Parachute:</strong> Canopy descent aerodynamics.</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: SYSTEM ARCHITECTURE -->
+    <div class="slide">
+      <div class="category-tag">✈ 02. SYSTEM ARCHITECTURE</div>
+      <div class="slide-title">Multi-Stage Aerial Detection & Tracking Architecture</div>
+      <div class="grid-5">
+        <div class="card">
+          <div class="card-title" style="color:var(--accent-cyan);">1. VIDEO INPUT</div>
+          <div class="card-subtitle">Raw Video Stream</div>
+          <ul class="card-list">
+            <li>Accepts MP4, AVI, MOV, WebM, MKV.</li>
+            <li>Decompresses frames sequentially.</li>
+            <li>Configurable stride (1, 2, 3, 5, 10).</li>
+          </ul>
+        </div>
+        <div class="card highlight">
+          <div class="card-title" style="color:var(--accent-cyan);">2. YOLO12</div>
+          <div class="card-subtitle">Object Localization</div>
+          <ul class="card-list">
+            <li>Anchor-free YOLO12 balanced weights.</li>
+            <li>Locates small targets with high recall.</li>
+            <li>Filters via confidence threshold (0.10).</li>
+          </ul>
+        </div>
+        <div class="card highlight">
+          <div class="card-title" style="color:var(--accent-cyan);">3. BYTETRACK</div>
+          <div class="card-subtitle">Trajectory Tracking</div>
+          <ul class="card-list">
+            <li>Associates bounding boxes over time.</li>
+            <li>Assigns persistent Tracker IDs.</li>
+            <li>Extracts 4-frame center motion vectors.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--accent-cyan);">4. MOBILENET</div>
+          <div class="card-subtitle">Feature Extraction</div>
+          <ul class="card-list">
+            <li>Frozen MobileNetV3-Small backbone.</li>
+            <li>Crops resized & normalized to 224x224.</li>
+            <li>Produces 576-dim feature tokens.</li>
+          </ul>
+        </div>
+        <div class="card highlight">
+          <div class="card-title" style="color:var(--accent-cyan);">5. HYBRID HEAD</div>
+          <div class="card-subtitle">Classification</div>
+          <ul class="card-list">
+            <li>Evaluates spatial/temporal tokens.</li>
+            <li>Outputs 6-class probability distribution.</li>
+            <li>Conducts weighted consensus voting.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: YOLO12 -->
+    <div class="slide">
+      <div class="category-tag">✈ 02. SYSTEM ARCHITECTURE</div>
+      <div class="slide-title">Object Detection Engine: YOLO12 Architecture</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">YOLO12 Detection Specifications</div>
+          <div class="card-subtitle">High-Recall Aerial Localization</div>
+          <ul class="card-list">
+            <li><strong>State-of-the-Art Architecture:</strong> Employs area attention and flash attention mechanisms for efficient multi-scale spatial receptive fields.</li>
+            <li><strong>Balanced Checkpoint:</strong> Utilizes trained YOLO12 balanced weights (<code>best.pt</code>) tuned on multi-class flying objects.</li>
+            <li><strong>Small Target Sensitivity:</strong> Configurable threshold down to 0.10 confidence, ensuring distant, sub-30-pixel objects are retained.</li>
+            <li><strong>Multi-Resolution Inference:</strong> Supports input dimensions (320x320 up to 640x640) for balancing GPU/CPU throughput.</li>
+            <li><strong>Decoupled Classification:</strong> High-recall region proposal generator feeding high-fidelity object crops into specialized downstream heads.</li>
+          </ul>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div style="border-radius:12px; overflow:hidden; height:240px; border:1px solid var(--border);">
+            <img src="presentation_images/helicopter.jpg" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div class="card highlight">
+            <div class="card-title">Detection Runtime Parameters</div>
+            <ul class="card-list">
+              <li><strong>Default Confidence:</strong> 0.10 (Captures small, distant targets)</li>
+              <li><strong>Inference Resolution:</strong> 640x640 (Optimal edge definition)</li>
+              <li><strong>Device Support:</strong> Seamless auto-switching between CUDA GPU & CPU</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: BYTETRACK -->
+    <div class="slide">
+      <div class="category-tag">✈ 02. SYSTEM ARCHITECTURE</div>
+      <div class="slide-title">Multi-Object Trajectory Modeling with ByteTrack</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-num">01</div>
+          <div class="card-title">Why ByteTrack is Vital for Aerial Video</div>
+          <div class="card-subtitle">Continuous Trajectory Association</div>
+          <ul class="card-list">
+            <li><strong>Low-Score Retention:</strong> Unlike standard SORT which discards boxes below 0.5, ByteTrack recovers true low-confidence boxes (e.g. distant or partially occluded objects).</li>
+            <li><strong>Persistent Track IDs:</strong> Assigns consistent object IDs across consecutive frames, preventing ID switching when objects bank or turn.</li>
+            <li><strong>Kalman Filter Prediction:</strong> Smooths bounding box jitter and predicts target location during temporary occlusions (e.g. clouds).</li>
+            <li><strong>Trajectory Construction:</strong> Accumulates the last 4 observed bounding box centers [x, y, w, h] to compute velocity vectors.</li>
+          </ul>
+        </div>
+        <div class="card highlight">
+          <div class="card-num">02</div>
+          <div class="card-title">Trajectory Feature Representation</div>
+          <div class="card-subtitle">580-Dimensional Temporal Token</div>
+          <ul class="card-list">
+            <li><strong>4-Frame Observation Buffer:</strong> Maintains a sliding deque of length 4 for every active ByteTrack ID.</li>
+            <li><strong>Visual + Motion Concatenation:</strong> Each observation combines 576 MobileNetV3 visual features with 4 spatial box-center coordinates → 580-dim input vector.</li>
+            <li><strong>Velocity Modeling:</strong> Explicitly encodes direction of travel (dx/dt, dy/dt) and change in scale (dw/dt, dh/dt).</li>
+            <li><strong>Disambiguation Engine:</strong> Crucial for separating flapping birds from soaring kites and steady-altitude UAVs.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: 5 HYBRID HEADS -->
+    <div class="slide">
+      <div class="category-tag">✈ 03. HYBRID CLASSIFIERS</div>
+      <div class="slide-title">Deep Dive: The 5 Specialized Classifier Heads</div>
+      <div class="grid-5">
+        <div class="card">
+          <div class="card-title" style="color:var(--accent-cyan);">YOLO12 + CNN</div>
+          <div class="card-subtitle">1D Convolutional Net</div>
+          <ul class="card-list">
+            <li>Processes single-frame visual tokens.</li>
+            <li>1D Conv layers (576->128->64) with AdaptiveAvgPool.</li>
+            <li>Fastest inference head; best for distinct views.</li>
+          </ul>
+        </div>
+        <div class="card green-highlight">
+          <div class="card-title" style="color:var(--accent-green);">YOLO12 + LSTM</div>
+          <div class="card-subtitle">Top Performer (91.98%)</div>
+          <ul class="card-list">
+            <li>Processes 4-frame visual + motion sequences (580-dim).</li>
+            <li>Hidden dimension: 64; LayerNorm + Linear classifier.</li>
+            <li>Learns acceleration & path dynamics.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--accent-cyan);">Transformer</div>
+          <div class="card-subtitle">Self-Attention Encoder</div>
+          <ul class="card-list">
+            <li>2-layer Transformer Encoder with 4 attention heads.</li>
+            <li>Learns positional spatial token embeddings across crops.</li>
+            <li>Captures subtle inter-part visual dependencies.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--accent-cyan);">BiLSTM + Attn</div>
+          <div class="card-subtitle">Bidirectional Head</div>
+          <ul class="card-list">
+            <li>Bidirectional LSTM with learned attention pooling.</li>
+            <li>Processes trajectories forward and backward.</li>
+            <li>Highlights critical transitional banking frames.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--accent-cyan);">cGAN + Trans.</div>
+          <div class="card-subtitle">Synthetic Augmentation</div>
+          <ul class="card-list">
+            <li>Trained with conditional GAN synthesized features.</li>
+            <li>Addresses class imbalance and rare viewing angles.</li>
+            <li>Improves generalization (+4.11% gain).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: RESULTS -->
+    <div class="slide">
+      <div class="category-tag">✈ 04. BENCHMARKS & DEPLOYMENT</div>
+      <div class="slide-title">Performance Benchmark & Validation Results</div>
+      <div class="grid-2">
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>Hybrid Pipeline Head</th>
+                <th>Test Accuracy</th>
+                <th>Test Macro F1</th>
+                <th>Validation Acc</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background:rgba(52, 211, 153, 0.1);">
+                <td><strong>YOLO12 + LSTM</strong> <span class="badge-best">TOP BEST</span></td>
+                <td style="color:var(--accent-green); font-weight:700;">91.98%</td>
+                <td style="color:var(--accent-green); font-weight:700;">92.89%</td>
+                <td>82.43%</td>
+              </tr>
+              <tr>
+                <td>YOLO12 + BiLSTM + Attention</td>
+                <td>88.81%</td>
+                <td>87.97%</td>
+                <td>76.58%</td>
+              </tr>
+              <tr>
+                <td>YOLO12 + cGAN + Transformer</td>
+                <td>82.19%</td>
+                <td>81.77%</td>
+                <td>82.42%</td>
+              </tr>
+              <tr>
+                <td>YOLO12 + CNN</td>
+                <td>81.05%</td>
+                <td>79.97%</td>
+                <td>84.07%</td>
+              </tr>
+              <tr>
+                <td>YOLO12 + Transformer</td>
+                <td>78.08%</td>
+                <td>76.92%</td>
+                <td>81.32%</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="card highlight" style="margin-top:20px;">
+            <div class="card-title">Production Checkpoints Included</div>
+            <ul class="card-list">
+              <li><strong>Detector:</strong> <code>yolo12_balanced/weights/best.pt</code> (5.5 MB)</li>
+              <li><strong>Heads:</strong> <code>LSTM.pt</code> (0.68 MB), <code>BiLSTM_Attention.pt</code> (1.36 MB), <code>CNN.pt</code>, <code>Transformer.pt</code>, <code>cGAN_Transformer.pt</code></li>
+            </ul>
+          </div>
+        </div>
+        <div class="card green-highlight">
+          <div class="card-title">Key Empirical Findings</div>
+          <div class="card-subtitle">Analysis of Results</div>
+          <ul class="card-list">
+            <li><strong>Temporal Superiority:</strong> The LSTM head achieved the highest overall score (91.98% Acc, 92.89% F1), proving that 4-frame trajectory dynamics are decisive for flying object recognition.</li>
+            <li><strong>Attention Benefits:</strong> BiLSTM with Attention reached 88.81% accuracy, confirming that weighting informative acceleration phases improves classification.</li>
+            <li><strong>cGAN Synthetic Boost:</strong> cGAN augmentation lifted Transformer accuracy from 78.08% to 82.19% (+4.11% gain), showing synthetic feature diversity mitigates aerial class imbalances.</li>
+            <li><strong>Spatial vs. Motion Tradeoff:</strong> CNN heads offer rapid single-frame speed, but temporal heads drastically cut false-positive confusions between kites and birds.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: VIDEO CONSENSUS -->
+    <div class="slide">
+      <div class="category-tag">✈ 04. BENCHMARKS & DEPLOYMENT</div>
+      <div class="slide-title">Video-Level Consensus & Decision Aggregation</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-num">01</div>
+          <div class="card-title">Confidence-Weighted Voting Engine</div>
+          <div class="card-subtitle">Robust Temporal Aggregation</div>
+          <ul class="card-list">
+            <li><strong>Frame-Level Robustness:</strong> Flying objects frequently undergo temporary specular reflections, motion blur, or partial occlusion causing single-frame misclassifications.</li>
+            <li><strong>Weighted Accumulation:</strong> Rather than naive unweighted majority voting, each detection contributes its model confidence score to its predicted class bucket.</li>
+            <li><strong>Mathematical Formulation:</strong> Score(C) = &Sigma;(Conf<sub>i</sub> &times; I(Class<sub>i</sub> = C)) across all detected frames i.</li>
+            <li><strong>Final Verdict Generation:</strong> The class achieving the highest accumulated confidence weight is designated the definitive video-level label.</li>
+            <li><strong>Elimination of Outliers:</strong> Transient misdetections (e.g. 1 frame of noise) are easily outvoted by dozens of consistent high-confidence detections.</li>
+          </ul>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div style="border-radius:12px; overflow:hidden; height:210px; border:1px solid var(--border);">
+            <img src="presentation_images/kite.jpg" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div class="card highlight">
+            <div class="card-title">Exported Analytics Deliverables</div>
+            <ul class="card-list">
+              <li><strong>1. Annotated Video (*_annotated.mp4):</strong> Full-framerate video with bounding boxes, tracker IDs, and predicted class labels.</li>
+              <li><strong>2. Frame Log (*_detections.csv):</strong> Timestamped record of every box coordinate, detector confidence, and classifier score.</li>
+              <li><strong>3. Summary (*_classification.csv):</strong> Final video-level predicted class and its total weighted vote share.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11: STREAMLIT APP -->
+    <div class="slide">
+      <div class="category-tag">✈ 04. BENCHMARKS & DEPLOYMENT</div>
+      <div class="slide-title">Interactive Deployment: Streamlit Web UI</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Web Interface Capabilities</div>
+          <div class="card-subtitle">Production-Ready Web Application</div>
+          <ul class="card-list">
+            <li><strong>Zero-Friction Deployment:</strong> Running natively on Streamlit with zero external web server dependencies (active on http://localhost:8501).</li>
+            <li><strong>Drag & Drop File Upload:</strong> Supports MP4, MOV, AVI, MKV, M4V, and WebM video formats directly via browser.</li>
+            <li><strong>Real-Time Pipeline Switching:</strong> Interactive sidebar allows switching between all 5 hybrid heads on the fly without restarting.</li>
+            <li><strong>Live Inference Preview:</strong> Streams processed video frames live with color-coded bounding boxes and tracker identity trails.</li>
+            <li><strong>Dynamic Hyperparameter Sliders:</strong> Real-time control of confidence threshold (0.01 - 0.90), image size (320 - 640), and frame stride (1 - 10).</li>
+          </ul>
+        </div>
+        <div class="card highlight">
+          <div class="card-title">Runtime Execution Environment</div>
+          <div class="card-subtitle">Engine Architecture & Performance</div>
+          <ul class="card-list">
+            <li><strong>Local Server:</strong> Running on Uvicorn & Streamlit engine inside Python 3.11 isolated virtual environment (.venv).</li>
+            <li><strong>Hardware Acceleration:</strong> Seamless auto-detection for NVIDIA CUDA GPUs; optimized CPU fallback with PyTorch CPU backend.</li>
+            <li><strong>One-Click Launcher:</strong> Windows batch script (RUN_PROJECT.bat) enables immediate launch with a double-click.</li>
+            <li><strong>Memory Efficiency:</strong> Uses PyTorch torch.no_grad() and OpenCV streaming decoders to process long video files without RAM overflow.</li>
+            <li><strong>Output Organization:</strong> Automatically organizes runs by timestamp into dedicated video_engine_outputs/ folders.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12: CONCLUSION -->
+    <div class="slide">
+      <div class="category-tag">✈ 04. BENCHMARKS & DEPLOYMENT</div>
+      <div class="slide-title">Conclusion & Future Research Directions</div>
+      <div class="grid-2">
+        <div class="card highlight">
+          <div class="card-title">Project Summary & Accomplishments</div>
+          <div class="card-subtitle">Core Contributions</div>
+          <ul class="card-list">
+            <li><strong>End-to-End Pipeline:</strong> Successfully built and verified a complete video analytics pipeline combining YOLO12, ByteTrack, and MobileNetV3.</li>
+            <li><strong>Temporal Mastery:</strong> Demonstrated that modeling 4-frame trajectory sequences with LSTM boosts classification accuracy to 91.98% (outperforming static image models).</li>
+            <li><strong>cGAN Synthetic Proof:</strong> Proved that generative feature augmentation mitigates aerial dataset imbalance, providing a +4.11% accuracy improvement.</li>
+            <li><strong>Operational Interface:</strong> Delivered a fully functional, localized Streamlit application for immediate real-world video processing and analysis.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">Future Research & Expansion</div>
+          <div class="card-subtitle">Roadmap & Next Steps</div>
+          <ul class="card-list">
+            <li><strong>1. Thermal & Infrared (IR) Fusion:</strong> Integrating dual-spectrum RGB + FLIR thermal cameras for night-time aerial tracking.</li>
+            <li><strong>2. Edge Hardware Acceleration:</strong> Quantizing YOLO12 and LSTM heads into TensorRT / ONNX for deployment on NVIDIA Jetson Orin and drones.</li>
+            <li><strong>3. Multi-Camera Network Fusion:</strong> Correlating ByteTrack IDs across multi-camera radar/optical arrays for airspace monitoring.</li>
+            <li><strong>4. Joint End-to-End Fine-Tuning:</strong> Training detector and sequence classifier jointly with spatio-temporal contrastive loss.</li>
+            <li><strong>5. Expanded Taxonomy:</strong> Extending classes to gliders, hot air balloons, birds of prey, and hypersonic objects.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const counter = document.getElementById('counter');
+
+    function showSlide(index) {
+      slides.forEach((s, i) => s.classList.toggle('active', i === index));
+      counter.textContent = `${index + 1} / ${slides.length}`;
+    }
+
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % slides.length;
+      showSlide(currentSlide);
+    }
+
+    function prevSlide() {
+      currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+      showSlide(currentSlide);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+    });
+  </script>
+</body>
+</html>
+

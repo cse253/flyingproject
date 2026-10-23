@@ -1,0 +1,36 @@
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+*/.venv/
+*/venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Local configuration
+.env
+.env.*
+.streamlit/secrets.toml
+
+# Generated outputs & media files
+video_engine_outputs/
+*/video_engine_outputs/
+DS/
+*.zip
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
